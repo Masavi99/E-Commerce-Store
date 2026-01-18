@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
 
 const userSchcema = new mongoose.Schema({
     name: {
@@ -36,4 +37,26 @@ const userSchcema = new mongoose.Schema({
     }
 }, {
     timestamps: true
-})
+});
+
+userSchcema.pre("save", async function () {
+    if (!this.isModified("password")) return;
+
+    try {
+        const salt = await bcrypt.genSalt(10);
+        this.password = await bcrypt.hash(this.password, salt);
+
+    } catch (error) {
+        throw new Error("password encryption failed");
+    }
+
+});
+
+userSchcema.methods.comparePassword = async function (password) {
+    return bcrypt.compare(password, this.password);
+};
+
+
+const User = mongoose.model("User", userSchcema);
+
+export default User;

@@ -1,12 +1,26 @@
+import User from "../models/user.model.js"
+
 export const signup = async (req, res) => {
-    res.send("Signup Route");
-}
+    const { email, password, name } = req.body
+    try {
+        const userExists = await User.findOne({ email });
+
+        if (userExists) {
+            return res.status(400).json({ message: "User already Exists" });
+        }
+        const user = await User.create({ name, email, password });
+        // res.send("Signup Route");
+        res.status(201).json({ user, message: "User Created" });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
 export const login = async (req, res) => {
     res.send("Login Route");
-}
+};
 export const logout = async (req, res) => {
     res.send("Logout Route");
-}
+};
 
 
 
